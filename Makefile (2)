@@ -1,0 +1,24 @@
+CC      = riscv64-linux-gnu-gcc
+CFLAGS  = -march=rv64gcv -mabi=lp64d -g -O0
+LDFLAGS = -lm
+
+EMU     = qemu-riscv64 -cpu rv64,v=true,vlen=128 -L /usr/riscv64-linux-gnu
+
+.PHONY: all lkf ekf run-lkf run-ekf clean
+
+all: lkf ekf
+
+lkf: lkf_vector.s
+	$(CC) $(CFLAGS) -o lkf lkf_vector.s $(LDFLAGS)
+
+ekf: ekf_vector.s
+	$(CC) $(CFLAGS) -o ekf ekf_vector.s $(LDFLAGS)
+
+run-lkf: lkf
+	$(EMU) ./lkf
+
+run-ekf: ekf
+	$(EMU) ./ekf
+
+clean:
+	rm -f lkf ekf *.o lkf_vector_output.csv ekf_vector_output.csv

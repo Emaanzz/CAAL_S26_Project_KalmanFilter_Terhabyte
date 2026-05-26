@@ -1,0 +1,30 @@
+# ============================================================
+# Makefile – Milestone 4: EKF Vectorised (RISC-V RVV)
+# ============================================================
+CROSS_PREFIX ?= riscv64-unknown-linux-gnu-
+AS  := $(CROSS_PREFIX)as
+GCC := $(CROSS_PREFIX)gcc
+
+# rv64gcv = base 64-bit + C + D + Vector (RVV 1.0)
+ARCH  := -march=rv64gcv -mabi=lp64d
+ASFLAGS := $(ARCH) -g
+LDFLAGS := -lc -lm
+
+all: ekf_vector ekf_scalar
+
+ekf_vector: ekf_vector.o
+	$(GCC) $(ARCH) -o $@ $^ $(LDFLAGS)
+
+ekf_vector.o: ekf_vector.s
+	$(AS) $(ASFLAGS) -o $@ $<
+
+ekf_scalar: ekf_asm.o
+	$(GCC) $(ARCH) -o $@ $^ $(LDFLAGS)
+
+ekf_asm.o: ekf_asm.s
+	$(AS) $(ASFLAGS) -o $@ $<
+
+clean:
+	rm -f *.o ekf_vector ekf_scalar
+
+.PHONY: all clean
